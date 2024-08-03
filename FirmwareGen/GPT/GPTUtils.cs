@@ -80,10 +80,11 @@ namespace FirmwareGen.GPT
                 ulong FourGigaBytes = AndroidDesiredSpace / SectorSize;
                 WindowsLBACount = UsableLBACount - ESPLBACount - FourGigaBytes;
 
-                if (WindowsLBACount < SixtyFourGigaBytes)
-                {
-                    WindowsLBACount = SixtyFourGigaBytes;
-                }
+                // hack for 64gb
+                // if (WindowsLBACount < SixtyFourGigaBytes)
+                // {
+                //     WindowsLBACount = SixtyFourGigaBytes;
+                // }
 
                 if (WindowsLBACount % BlockSize != 0)
                 {
