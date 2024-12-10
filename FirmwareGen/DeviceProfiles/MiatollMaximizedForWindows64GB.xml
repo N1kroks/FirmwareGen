@@ -6,7 +6,7 @@
   </PlatformIDs>
   <FFUFileName>miatoll_64GB_MaximizedForWindows.ffu</FFUFileName>
   <DriverDefinitionPath>\definitions\Desktop\ARM64\Internal\miatoll.xml</DriverDefinitionPath>
-  <DiskTotalSize>59399733248</DiskTotalSize>
+  <DiskTotalSize>59391344640</DiskTotalSize>
   <DiskSectorSize>4096</DiskSectorSize>
   <PartitionLayout>
     <GPTPartition>
