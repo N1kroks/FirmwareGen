@@ -46,5 +46,11 @@ namespace FirmwareGen.CommandLine
         {
             get; set;
         }
+
+        [Option('b', "dev-build", HelpText = "Developer build with no drivers installed and enabled KDNET and RDP", Default = false, Required = false)]
+        public bool DevBuild
+        {
+            get; set;
+        }
     }
 }

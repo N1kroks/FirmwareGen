@@ -71,8 +71,45 @@ namespace FirmwareGen
                 VolumeUtils.UnmountSystemPartition(DiskId, SystemPartition);
             }
 
-            Logging.Log("Adding drivers");
-            VolumeUtils.RunProgram(DriverUpdater, $@"-d ""{options.DriverPack}{deviceProfile.DriverDefinitionPath}"" -r ""{options.DriverPack}"" -p ""{VHDLetter}""");
+            if (options.DevBuild) {
+                string[] bcd = {
+                    "/set \"{default}\" testsigning on",
+                    "/set \"{default}\" nointegritychecks on",
+                    "/set \"{default}\" recoveryenabled no",
+                    "/set \"{default}\" bootstatuspolicy IgnoreAllFailures",
+                    "/set \"{default}\" debug on",
+                    "/dbgsettings net hostip:169.254.255.255 port:50000 key:1.1.1.1"
+                };
+
+                VolumeUtils.MountSystemPartition(DiskId, SystemPartition);
+
+                Logging.Log("Enabling KDNET debugging");
+                foreach (string command in bcd)
+                {
+                    VolumeUtils.RunProgram("bcdedit.exe", $"{$@"/store {SystemPartition}\EFI\Microsoft\Boot\BCD "}{command}");
+                }
+
+                VolumeUtils.UnmountSystemPartition(DiskId, SystemPartition);
+
+                Logging.Log("Enabling RDP");
+                string[] rdp = {
+                    "add \"HKLM\\RTSYSTEM\\ControlSet001\\Control\\Terminal Server\" /v fDenyTSConnections /t REG_DWORD /d 0 /f",
+                    "add \"HKLM\\RTSYSTEM\\ControlSet001\\Control\\Terminal Server\" /v fSingleSessionPerUser /t REG_DWORD /d 0 /f",
+                    "add \"HKLM\\RTSYSTEM\\ControlSet001\\Control\\Lsa\" /v LimitBlankPasswordUse /t REG_DWORD /d 0 /f",
+                    "add \"HKLM\\RTSYSTEM\\ControlSet001\\Services\\MpsSvc\" /v Start /t REG_DWORD /d 4 /f"
+                };
+                VolumeUtils.RunProgram("reg.exe", $"load HKLM\\RTSYSTEM {VHDLetter}\\Windows\\System32\\config\\SYSTEM");
+                foreach (string command in rdp)
+                {
+                    VolumeUtils.RunProgram("reg.exe", $"{command}");
+                }
+                VolumeUtils.RunProgram("reg.exe", "unload HKLM\\RTSYSTEM");
+            }
+
+            if (!options.DevBuild) {
+                Logging.Log("Adding drivers");
+                VolumeUtils.RunProgram(DriverUpdater, $@"-d ""{options.DriverPack}{deviceProfile.DriverDefinitionPath}"" -r ""{options.DriverPack}"" -p ""{VHDLetter}""");
+            }
 
             VolumeUtils.DismountVirtualHardDisk(TmpVHD);
 
